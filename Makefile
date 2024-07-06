@@ -1,5 +1,7 @@
-# TOOLCHAIN="+nightly-2023-08-15-x86_64-unknown-linux-gnu"
-# RUSTFLAGS+="-C target-feature=+crt-static -C link-arg=-no-pie"
+# The toolchain we use.
+# You can get it by running DragonOS' `tools/bootstrap.sh`
+TOOLCHAIN="+nightly-2023-08-15-x86_64-unknown-linux-gnu"
+RUSTFLAGS+=""
 
 ifdef DADK_CURRENT_BUILD_DIR
 # 如果是在dadk中编译，那么安装到dadk的安装目录中
@@ -8,6 +10,7 @@ else
 # 如果是在本地编译，那么安装到当前目录下的install目录中
 	INSTALL_DIR = ./install
 endif
+
 
 ifeq ($(ARCH), x86_64)
 	export RUST_TARGET=x86_64-unknown-linux-musl
@@ -18,32 +21,14 @@ else
 	export RUST_TARGET=x86_64-unknown-linux-musl
 endif
 
-run:
-	RUSTFLAGS=$(RUSTFLAGS) cargo $(TOOLCHAIN) run --target $(RUST_TARGET)
-
-build-linux:
+build:
 	RUSTFLAGS=$(RUSTFLAGS) cargo $(TOOLCHAIN) build --target $(RUST_TARGET)
 
-build-dragonos:
-	RUSTFLAGS=$(RUSTFLAGS) cargo $(TOOLCHAIN) build --target $(RUST_TARGET) --features dragonos
+run-dragonreach:
+	RUSTFLAGS=$(RUSTFLAGS) cargo $(TOOLCHAIN) run --target $(RUST_TARGET) --bin DragonReach
 
 clean:
-	RUSTFLAGS=$(RUSTFLAGS) cargo $(TOOLCHAIN) clean --target $(RUST_TARGET)
-
-test:
-	RUSTFLAGS=$(RUSTFLAGS) cargo $(TOOLCHAIN) test --target $(RUST_TARGET)
-
-doc:
-	RUSTFLAGS=$(RUSTFLAGS) cargo $(TOOLCHAIN) doc --target $(RUST_TARGET)
-
-fmt:
-	RUSTFLAGS=$(RUSTFLAGS) cargo $(TOOLCHAIN) fmt
-
-fmt-check:
-	RUSTFLAGS=$(RUSTFLAGS) cargo $(TOOLCHAIN) fmt --check
-
-run-release:
-	RUSTFLAGS=$(RUSTFLAGS) cargo $(TOOLCHAIN) run --target $(RUST_TARGET) --release
+	RUSTFLAGS=$(RUSTFLAGS) cargo $(TOOLCHAIN) clean
 
 build-release:
 	RUSTFLAGS=$(RUSTFLAGS) cargo $(TOOLCHAIN) build --target $(RUST_TARGET) --release
@@ -51,12 +36,12 @@ build-release:
 clean-release:
 	RUSTFLAGS=$(RUSTFLAGS) cargo $(TOOLCHAIN) clean --target $(RUST_TARGET) --release
 
-test-release:
-	RUSTFLAGS=$(RUSTFLAGS) cargo $(TOOLCHAIN) test --target $(RUST_TARGET) --release
+fmt:
+	RUSTFLAGS=$(RUSTFLAGS) cargo $(TOOLCHAIN) fmt
 
-.PHONY: install-dragonos
-install-dragonos:
-	RUSTFLAGS=$(RUSTFLAGS) cargo $(TOOLCHAIN) install --target $(RUST_TARGET) --features dragonos --path . --no-track --root $(INSTALL_DIR) --force
+fmt-check:
+	RUSTFLAGS=$(RUSTFLAGS) cargo $(TOOLCHAIN) fmt --check
 
-install-linux:
+.PHONY: install
+install:
 	RUSTFLAGS=$(RUSTFLAGS) cargo $(TOOLCHAIN) install --target $(RUST_TARGET) --path . --no-track --root $(INSTALL_DIR) --force
